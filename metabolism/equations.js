@@ -5,18 +5,17 @@ function G(x, p) {
 }
 
 function f_insulin(t, insulin, n_insulin) {
-    return insulin * -profile.e.insulin * G(t - profile.n.insulin - n_insulin, profile.p.insulin);
+    return insulin * -profile.get_value("einsulin") * G(t - profile.get_value("ninsulin") - n_insulin, profile.get_value("pinsulin"));
 }
 function f_carbs(t, carbs) {
-    return carbs * profile.e.carbs * G(t - profile.n.carbs, profile.p.carbs);
+    return carbs * profile.get_value("ecarbs") * G(t - profile.get_value("ncarbs"), profile.get_value("pcarbs"));
 }
 function f_protein(t, protein) {
-    return protein * profile.e.protein * G(t - profile.n.protein, profile.p.protein);
+    return protein * profile.get_value("eprotein") * G(t - profile.get_value("nprotein"), profile.get_value("pprotein"));
 }
 
 function f_all(t, n_insulin, insulin, carbs, protein) {
-    // return f_insulin(t - profile.n.system, insulin, n_insulin) + f_meal(t, carbs, protein);
-    return f_insulin(t - profile.n.system, insulin, n_insulin) + f_carbs(t - profile.n.system, carbs) + f_protein(t - profile.n.system, protein)
+    return f_insulin(t, insulin, n_insulin) + f_carbs(t, carbs) + f_protein(t, protein);
 }
 
 function integral_range(f, y_offset, a, b, minThreshold, n = 1000) {
@@ -43,6 +42,8 @@ function integral_range(f, y_offset, a, b, minThreshold, n = 1000) {
         //     console.log("UH OH", currentIntegral)
         //     return null;
         // }
+        // If the graph is descending and the integral is below the threshold
+        // we could possibly use f1<0 instead of currentintegral<lastintegral because f1 is the derivative of the integral
         if (currentIntegral < lastIntegral && currentIntegral <= minThreshold) {
             return null;
         }
