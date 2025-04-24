@@ -3,6 +3,10 @@ const profile = new StorageNode("profile");
 // General user preferences
 profile.add_value("target", 83);
 
+profile.add_value("mls_per_cap", 15);
+profile.add_value("glucose_density", 15/60);
+profile.add_value("eglucose", 4.75);
+
 // E values : effectiveness (mg/dL) / (unit/gram)
 profile.add_value("ecarbs", 4.75);
 profile.add_value("eprotein", 1.23);

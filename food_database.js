@@ -1,6 +1,7 @@
 /* Food Database Entries 
 
-Syntax: add_food("Name", g carbs per 100g, g protein per 100g)
+Syntax: add_food("Name", g carbs per unit, g protein per unit, UNIT)
+UNIT can either be 'UNIT' or 'GRAMS'
 */
 add_food("Avacado", 12, 0, UNIT);
 add_food("Avacado (by weight)", 8.5, 2);
