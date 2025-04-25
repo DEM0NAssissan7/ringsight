@@ -2,8 +2,6 @@ let ns = new StorageNode("nightscout");
 ns.add_value("url", "https://example.com");
 ns.add_value("api_secret", "");
 ns.add_value("profile", "");
-ns.add_value("entries", []);
-ns.add_value("last_updated", null);
 
 function ns_api_path(path) {
     return `${ns.get("url")}/api/v1/${path}`
@@ -60,9 +58,6 @@ function mark_nightscout_meal(meal) {
         eventType: "Meal"
     })
 }
-
-function nightscout_get_current_sugar() {
-    return nightscout_get_request("entries").then(a => {
-        return a[0].sgv;
-    });
+function get_nightscout_profile() {
+    return nightscout_get_request("profile").then(a => a[ns.get("profile_id")]);
 }
