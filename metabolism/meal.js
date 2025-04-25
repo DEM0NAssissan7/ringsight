@@ -1,11 +1,8 @@
-function gen_meal_uuid() {
-    return random(0, 2**32)
-}
 class Meal{
     carbs = 0;
     protein = 0;
     foods = [];
-    uuid = gen_meal_uuid();
+    uuid = gen_uuid();
     name = "";
     stringify() {
         let arr = [];
@@ -36,7 +33,7 @@ class Meal{
     reset() {
         this.foods = [];
         this.calc_self_nutrition();
-        this.uuid = gen_meal_uuid();
+        this.uuid = gen_uuid();
     }
 }
 let meal = new Meal();
