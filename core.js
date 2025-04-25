@@ -3,6 +3,7 @@ let core_storage = new StorageNode("core");
 function panic(message) {
     let m = `[${new Date().toISOString()}] PANIC: ${message}`;
     console.error(m);
+    lock_storage();
     confirm(`The application has had an irrecoverable error. A debug log will be printed to the console along with an export of the onboard storage.\n\nPlease report this if issues continue.\n-----------------------------------------------------\n${message}`);
     let dump = export_storage();
     console.log(`${dump}`);

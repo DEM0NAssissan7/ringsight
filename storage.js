@@ -23,6 +23,7 @@ function default_write_handler(a) {
 class StorageNode {
     values = []
     exclude_from_export = false;
+    locked = false;
     constructor(name) {
         this.name = name;
         storage_nodes.push(this); // add itself to the storage nodes array
@@ -82,11 +83,24 @@ class StorageNode {
 
     get_write_value(id) {
         let v = this.get_value_from_id(id);
-        return v.write_handler(v.value)
+        let value;
+        try {
+            value = v.write_handler(v.value);
+        } catch (e){
+            console.error(e);
+            panic(`'${id}' in node '${this.name}' has an improper write handler`);
+        }
+        return value;
     }
     get_real_value(id, write_value) {
         let v = this.get_value_from_id(id);
-        let value = v.read_handler(write_value);
+        let value;
+        try {
+            value = v.read_handler(write_value);
+        } catch (e){
+            console.error(e);
+            panic(`'${id}' in node '${this.name}' has an improper read handler`);
+        }
         return value;
     }
 
@@ -109,6 +123,18 @@ class StorageNode {
             item = this.get_real_value(id, item)
         this.set(id, item);
         return item;
+    }
+
+    lock() { // Lock the storage node to prevent any further possible damage
+        this.locked = true;
+        let lock_function = () => {
+            console.error(`node '${this.name}' is currently locked to prevent any possible data corruption. Reload the page.`);
+        }
+        this.get_write_value = lock_function;
+        this.get_real_value = lock_function;
+        this.get = lock_function;
+        this.set = lock_function;
+        throw new Error(`node '${this.name}' is locked`)
     }
 
     reset(id) {
@@ -206,4 +232,7 @@ function reset_storage() {
         n.reset_all();
     }
     location.reload(); // We only reload to absolutely ensure integrity of the application. We do NOT want to risk leaving the user in a bad place
+}
+function lock_storage() {
+    storage_nodes.map(a => a.lock());
 }
