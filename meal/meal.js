@@ -13,6 +13,7 @@ class Meal{
     name = "";
     series = null;
     cgm_series = null;
+    marked = false;
     constructor(timestamp) {
         this.set_timestamp(timestamp);
         this.series = new MathSeries();
@@ -73,6 +74,7 @@ class Meal{
     reset() {
         this.set_timestamp(new Date());
         this.foods = [];
+        this.insulins = [];
         this.calc_self_nutrition();
         this.uuid = gen_uuid();
     }
@@ -104,14 +106,25 @@ class Meal{
     get_n(timestamp) {
         return get_hour_difference(this.timestamp, timestamp);
     }
-    insulin(insulin, timestamp) {
-        this.series.add_function(t => insulin_metabolism(t, insulin, this.get_n(timestamp)));
-        this.insulins.push({
+    insulin(units, timestamp) {
+        this.series.add_function(t => insulin_metabolism(t, units, this.get_n(timestamp)));
+        let obj = {
             timestamp: timestamp,
-            insulin: insulin,
+            units: units,
             marked: false
-        });
+        };
+        this.insulins.push(obj);
         this.get_initial_glucose();
+        return obj;
+    }
+    mark_insulin(units) {
+        let timestamp = new Date();
+        let obj = this.insulin(units, timestamp);
+        mark_nightscout_insulin(this, units).then(() => (obj.marked = true));
+    }
+    mark() {
+        if(this.marked) throw new Error("Cannot mark meal: already marked");
+        mark_nightscout_meal(this).then(() => this.marked = true);
     }
 
     smoothline() {
