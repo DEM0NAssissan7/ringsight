@@ -107,7 +107,8 @@ class GlucoseSeries extends GraphSeries {
         }
     }
     create_update_interval() {
-        return this.interval = setInterval(() => this.populate(this.a, this.b), reading_per_millis());
+        const self = this;
+        return this.interval = setInterval(() => (self.populate(self.a, self.b)), reading_per_millis());
     }
     cancel_update_interval() {
         return clearInterval(this.interval);
