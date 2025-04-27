@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Metabolism Profiler</title>
+
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="storage.js"></script>
+    <script src="core.js"></script>
+    <script src="lib.js"></script>
+
+    <script src="graphics/graph.js"></script>
+    <script src="graphics/glucose.js"></script>
+
+    <script src="nightscout/cloud.js"></script>
+    <script src="nightscout/readings.js"></script>
+
+    <script src="metabolism/profile.js"></script>
+    <script src="metabolism/math.js"></script>
+    <script src="metabolism/metabolism.js"></script>
+</head>
+
+<body>
+
+    <h1>Metabolism Profiler</h1>
+
+    <div class="controls" id="sliders">
+    </div>
+
+    <script>
+        function set_controls() {
+
+            // Insulin parameters
+            create_profile_slider("einsulin");
+            create_profile_slider("ninsulin");
+            create_profile_slider("pinsulin");
+
+            // Carbohydrate parameters
+            create_profile_slider("ecarbs");
+            create_profile_slider("ncarbs");
+            create_profile_slider("pcarbs");
+
+            // Protein parameters
+            create_profile_slider("eprotein");
+            create_profile_slider("nprotein");
+            create_profile_slider("pprotein");
+
+            // Glucose (capsule) parameters
+            create_profile_slider("eglucose");
+            create_profile_slider("pglucose");
+            create_profile_slider("mls_per_cap");
+            create_profile_slider("glucose_density");
+
+            // Basal rate surplus
+            create_profile_slider("basal_surplus");
+        }
+    </script>
+    <button onclick="reset_profile_changes()">Undo All Changes</button>
+
+</body>
+
+</html>
