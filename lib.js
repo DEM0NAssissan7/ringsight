@@ -29,3 +29,6 @@ function dimension_conversion(source, target) {
 function round(num, precision) {
     return Math.round(num * (10 ** precision)) / (10 ** precision)
 }
+function get_hour_difference(timestampA, timestampB) {
+    return (get_unix_epoch_minutes(timestampB) - get_unix_epoch_minutes(timestampA)) / 60
+}
