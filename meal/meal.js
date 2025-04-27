@@ -14,7 +14,7 @@ class Meal{
     series = null;
     cgm_series = null;
     constructor(timestamp) {
-        this.timestamp = timestamp;
+        this.set_timestamp(timestamp);
         this.series = new MathSeries();
         this.series.color = "blue"
         this.series.type = "smoothline";
@@ -71,6 +71,7 @@ class Meal{
         }
     }
     reset() {
+        this.set_timestamp(new Date());
         this.foods = [];
         this.calc_self_nutrition();
         this.uuid = gen_uuid();
