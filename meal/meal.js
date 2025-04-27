@@ -141,6 +141,11 @@ class Meal{
         this.cgm_series.type = "points";
     }
 
+    get_sim_error() {
+        let a = this.get_n(this.get_sim_start());
+        let b = this.cgm_series.points[0].rawX;
+        return series_difference(this.series, this.cgm_series, a, b, get_reading_interval());
+    }
 }
 
 
