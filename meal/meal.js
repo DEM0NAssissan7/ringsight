@@ -27,18 +27,34 @@ class Meal{
         this.cgm_series.create_update_interval();
     }
     stringify() {
-        let arr = [];
+        let foods = [];
         for(let f of this.foods) {
-            arr.push(f.get_stringify_object());
+            foods.push(f.get_stringify_object());
         }
-        return JSON.stringify(arr);
+        return JSON.stringify({
+            foods: foods,
+            carbs: this.carbs_offset,
+            protein: this.protein_offset,
+            insulins: insulins,
+            uuid: this.uuid,
+        });
     }
     parse(string) {
-        let arr = JSON.parse(string);
-        for(let a of arr) {
+        let obj = JSON.parse(string);
+        for(let a of obj.foods) {
             let f = new Food(null, null, null, null);
             this.add_food(f.parse_object(a));
         }
+
+        this.carbs_offset = obj.carbs;
+        this.protein_offset = obj.protein;
+        this.uuid = obj.uuid;
+        for(let insulin of obj.insulins) {
+            let obj = this.insulin(insulin.units, new Date(insulin.timestamp));
+            obj.marked = insulin.marked;
+        }
+
+        this.calc_self_nutrition();
         this.get_initial_glucose();
     }
     add_food(food) {
