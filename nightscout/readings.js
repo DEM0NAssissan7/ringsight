@@ -1,23 +1,22 @@
-const Conversions = {
-    MMOL: 1/18.018,
-    MGDL: 1,
-}
+ns.add_value("minutes_per_reading", 5);
+ns.add_value("units", Units.Glucose.MGDL); // The opposite of whatever we currently have. This value converts whatever sugar unit we are using into mg/dl so that the math can work properly
+ns.add_value("profile_id", 0);
 
 class GlucoseReading {
     sugar = 0;
     conv = 0;
-    time = new Date();
+    timestamp = new Date();
     from_nightscout(ns_object) {
-        this.sugar = ns_object.sgv;
-        this.conv = this.convert();
+        this.raw_sugar = ns_object.sgv;
+        this.sugar = this.convert();
         this.set_time(ns_object.dateString);
         return this;
     }
     set_time(date) {
-        this.time = new Date(date);
+        this.timestamp = new Date(date);
     }
     convert() {
-        return this.sugar * ns.get("sugar_conversion");
+        return this.raw_sugar * ns.get("units");
     }
     stringify(obj) {
         return JSON.stringify(obj);
@@ -26,39 +25,25 @@ class GlucoseReading {
         let obj = JSON.parse(string);
         this.sugar = obj.sugar;
         this.conv = obj.conv;
-        this.time = new Date(obj.time);
+        this.timestamp = new Date(obj.time);
         return this;
     }
 }
-
-function stringify_entries(obj) {
-    return JSON.stringify(obj);
-}
-function parse_entries(string) {
-    return JSON.parse(string);
-}
-
-ns.add_value("entries", []);
-ns.add_handlers("entries", stringify_entries, parse_entries);
-ns.add_value("last_updated", null);
-ns.add_value("minutes_per_reading", 5);
-ns.add_value("units", Conversions.MGDL); // The opposite of whatever we currently have. This value converts whatever sugar unit we are using into mg/dl so that the math can work properly
-ns.add_value("profile_id", 0);
 
 function nightscout_get_current_sugar() {
     return nightscout_get_request("entries").then(a => {
         return a[0].sgv;
     });
 }
-function refresh_nightscout_entries(time = 2) {
-    let count = Math.round((time * 60) / ns.get("minutes_per_reading"));
-    nightscout_get_request(`entries.json?count=${count}`)
-        .then(r => r.json())
-        .then(data => {
-            let readings = data.map(a => new GlucoseReading().from_nightscout(a));
-            ns.set("entries", readings);
-            ns.set("last_updated", Date.now());
-        })
+function get_readings_count(timestampA, timestampB) { // 'a' and 'b' are in units of 
+    return (timestampB.getTime() - timestampA.getTime()) * dimension_conversion(Units.Time.MILLIS, Units.Time.MINUTES) / ns.get("minutes_per_reading");
+}
+function nightscout_get_readings(timestampA, timestampB) {
+    let count = get_readings_count(timestampA, timestampB);
+    return nightscout_get_request(`entries/sgv.json?find[date][$gte]=${timestampA.getTime()}&find[date][$lte]=${timestampB.getTime()}&count=${count}`)
+        // .then(r => JSON.parse(r))
+        // .then(console.log)
+        .then(data => data.map(a => new GlucoseReading().from_nightscout(a)))
         .catch(console.error);
 }
 let nightscout_interval;
@@ -67,16 +52,16 @@ function create_nightscout_cgm_interval() {
 }
 
 function convert_to_unit(value) {
-    return value * Conversions
+    return value * Units.Glucose
 }
 function get_nightscout_units() {
     get_nightscout_profile().then(a=> {
         switch(a.units) {
             case "mg/dl":
-                ns.set("units", Conversions.MGDL);
+                ns.set("units", Units.Glucose.MGDL);
                 break;
             case "mmol/l":
-                ns.set("units", Conversions.MMOL);
+                ns.set("units", Units.Glucose.MMOL);
                 break;
             default:
                 panic(`Nightscout: unknown units '${a.units}'`);
