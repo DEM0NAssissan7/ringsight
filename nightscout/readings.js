@@ -3,8 +3,8 @@ ns.add_value("units", Units.Glucose.MGDL); // The opposite of whatever we curren
 ns.add_value("profile_id", 0);
 
 class GlucoseReading {
+    raw_sugar = 0;
     sugar = 0;
-    conv = 0;
     timestamp = new Date();
     from_nightscout(ns_object) {
         this.raw_sugar = ns_object.sgv;
@@ -32,8 +32,11 @@ class GlucoseReading {
 
 function nightscout_get_current_sugar() {
     return nightscout_get_request("entries").then(a => {
-        return a[0].sgv;
+        return a[0];
     });
+}
+function reading_per_millis() {
+    return ns.get("minutes_per_reading") * dimension_conversion(Units.Time.MINUTES, Units.Time.MILLIS)
 }
 function get_readings_count(timestampA, timestampB) { // 'a' and 'b' are in units of 
     return (timestampB.getTime() - timestampA.getTime()) * dimension_conversion(Units.Time.MILLIS, Units.Time.MINUTES) / ns.get("minutes_per_reading");
@@ -46,9 +49,13 @@ function nightscout_get_readings(timestampA, timestampB) {
         .then(data => data.map(a => new GlucoseReading().from_nightscout(a)))
         .catch(console.error);
 }
-let nightscout_interval;
-function create_nightscout_cgm_interval() {
-    nightscout_interval = setInterval(refresh_nightscout_entries, ns.get("minutes_per_reading") * 60 * 1000);
+function nightscout_get_sugar(timestamp) {
+    return nightscout_get_request(`entries/sgv.json?find[date][$lte]=${timestamp.getTime()}&count=1`)
+        // .then(r => JSON.parse(r))
+        // .then(console.log)
+        .then(data => data.map(a => new GlucoseReading().from_nightscout(a)))
+        .then(arr => arr[0])
+        .catch(console.error);
 }
 
 function convert_to_unit(value) {
@@ -77,11 +84,17 @@ ns.add_handlers("graph_timestamp", a=>a, a=>new Date(a));
 ns.add_value("cgm_delay", 10); // How delayed the CGM is (in minutes)
 class GlucoseSeries extends GraphSeries {
     complete = false
+    interval = null;
+    a = 0;
+    b = 0;
     constructor(timestamp, a, b) { // 'a' and 'b' are in hours
         super()
         this.timestamp = timestamp;
-        this.populate(a, b);
+        this.a = a;
+        this.b = b;
+        this.populate(this.a, this.b);
     }
+    
     async populate(a, b) { // We populate the graph with whatever points we can from 'a' hours after timestamp and 'b' hours after timestamp
         let timestampA = this.get_timestamp_from_offset(a);
         let timestampB = this.get_timestamp_from_offset(b);
@@ -93,6 +106,13 @@ class GlucoseSeries extends GraphSeries {
             this.add_glucose_reading(r)
         }
     }
+    create_update_interval() {
+        return this.interval = setInterval(() => this.populate(this.a, this.b), reading_per_millis());
+    }
+    cancel_update_interval() {
+        return clearInterval(this.interval);
+    }
+
     add_glucose_reading(reading) {
         let x = this.get_relative_minutes(reading.timestamp) / 60;
         let y = reading.sugar;
