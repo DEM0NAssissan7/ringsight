@@ -37,27 +37,6 @@ function nightscout_post_request(path, content) {
             "credentials": "omit"
         });
 }
-
-function mark_nightscout_insulin(meal, amount) {
-    nightscout_post_request("treatments", {
-        uuid: meal.uuid,
-        insulin: amount,
-        eventType: "Meal Bolus"
-    })
-}
-function mark_nightscout_meal(meal) {
-    meal.calc_self_nutrition();
-    let uuid = meal.uuid;
-    let carbs = meal.carbs;
-    let protein = meal.protein;
-    nightscout_post_request("treatments", {
-        notes: `[${uuid}]:${carbs}/${protein}`,
-        carbs: carbs,
-        protein: protein,
-        uuid: uuid,
-        eventType: "Meal"
-    })
-}
 function get_nightscout_profile() {
     return nightscout_get_request("profile").then(a => a[ns.get("profile_id")]);
 }
