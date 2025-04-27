@@ -4,4 +4,37 @@
     height: 300px;
     border-bottom: 1px solid #ccc;
     overflow: hidden;
-}  
+    display: inline-block;
+}
+
+.dot {
+    height: 4px;
+    width: 4px;
+    background-color: #55ff00;
+    border-radius: 100%;
+    display: inline-block;
+    position: absolute;
+}
+
+.line {
+    border-radius: 0%;
+    display: inline-block;
+    position: absolute;
+}
+
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background: #fafafa;
+}
+.controls {
+    margin-bottom: 20px;
+    display: inline-block;
+}
+.slider-group {
+    margin: 10px 0;
+}
+.slider-label {
+    margin-bottom: 5px;
+    font-weight: bold;
+}
