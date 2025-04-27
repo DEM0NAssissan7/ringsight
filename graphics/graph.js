@@ -1,16 +1,4 @@
 const DEFAULT_POINT_DIAMETER = 4;
-const scheduleRender = (() => {
-    let scheduled = false;
-    return (fn) => {
-        if (!scheduled) {
-            scheduled = true;
-            requestAnimationFrame(() => {
-                fn();
-                scheduled = false;
-            });
-        }
-    }
-})();
 class Graph {
     element = document.createElement("div");
     series = [];
@@ -70,13 +58,14 @@ class GraphSeries {
     svg_paths = [];
     type = "points";
     smooth_factor = 1;
+    scheduled = false;
     constructor() {
     }
     point(x, y) {
         // Because graphs are functions, if the new point has the same x as an existing point, we overwrite it
         for (let p of this.points) {
             if (p.x === x) {
-                if (y !== p.y) {
+                if (p.y !== y) {
                     p.coords(x, y);
                     this.render_point(p);
                 }
@@ -123,14 +112,22 @@ class GraphSeries {
     render() {
         this.points.forEach(p => this.render_point(p));
     }
+    schedule_render (f) {
+        if (!this.scheduled) {
+            this.scheduled = true;
+            requestAnimationFrame(() => {
+                f();
+                this.scheduled = false;
+            });
+        }
+    }
     render_point(point) {
-        this.check_validity();
         if (this.smooth_factor < 1) {
             this.apply_smoothing(this.smooth_factor);
         }
         switch (this.type) {
             case "smoothline":
-                scheduleRender(() => this.render_smoothline());
+                this.schedule_render(() => this.render_smoothline());
                 // this.render_smoothline()
                 break;
             default:
@@ -139,8 +136,9 @@ class GraphSeries {
         }
     }
     render_smoothline() {
-        this.check_validity();
-
+        if (this.smooth_factor < 1) {
+            this.apply_smoothing(this.smooth_factor);
+        }
         for (let gi = 0; gi < this.graphs.length; gi++) {
             const graph = this.graphs[gi];
 
@@ -189,10 +187,6 @@ class GraphSeries {
         }
     }
 
-    check_validity() {
-        // if(ctx === null) throw new Error("Validity check failed: invalid or undefined rendering context");
-        if (this.graph === null) throw new Error("Validity check failed: invalid or undefined graph container");
-    }
     attach_point_elements() {
         this.graphs.forEach(g => {
             this.points.forEach(p => p.attach_to_graph(g));
