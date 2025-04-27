@@ -107,16 +107,24 @@ class Meal{
     }
 
 }
-let meal = new Meal(new Date());
 
-function reset_meal() {
-    meal.reset();
-    wizard_state.update("meal", meal);
-}
+
+let meal;
 
 let meal_storage = new StorageNode("saved_meals");
 meal_storage.add_value("meals", []);
 meal_storage.add_value("ignored", []);
+meal_storage.add_value("meal", meal);
+
+function reset_meal() {
+    meal.reset();
+    meal_storage.set("meal", meal);
+}
+function init_meal() {
+    meal = new Meal(new Date());
+    meal_storage.add_handlers("meal", meal.stringify, meal.parse)
+}
+
 
 function prompt_save_meal() {
     let name = prompt("Enter meal name");
