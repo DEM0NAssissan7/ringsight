@@ -24,9 +24,10 @@ class StorageNode {
     values = []
     exclude_from_export = false;
     locked = false;
-    constructor(name) {
+    constructor(name, push = false) {
         this.name = name;
-        storage_nodes.push(this); // add itself to the storage nodes array
+        if(!push)
+            storage_nodes.push(this); // add itself to the storage nodes array
     }
     add_value(id, default_value) {
         this.values.push({
@@ -46,12 +47,15 @@ class StorageNode {
 
     add_input_element(id, element, event, handler = (a, b) => a) {
         let self = this;
+        $(element).val(this.get(id));
         $(element).on(event, function(e) {
             self.set(id, handler($(element).val(), e));
         })
     }
     add_output_element(id, element, handler = a => a) {
-        this.add_callback(id, a => {$(element).html(handler(a))});
+        let f = a => {$(element).html(handler(a))};
+        f(this.get(id))
+        this.add_callback(id, f);
     }
     add_callback(id, callback) {
         let v = this.get_value_from_id(id);
