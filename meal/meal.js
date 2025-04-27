@@ -140,7 +140,7 @@ function ignore_meal(uuid) {
 // Nightscout
 let loaded_meals = [];
 function mark_nightscout_insulin(meal, amount) {
-    nightscout_post_request("treatments", {
+    return nightscout_post_request("treatments", {
         uuid: meal.uuid,
         insulin: amount,
         eventType: "Meal Bolus"
@@ -151,8 +151,8 @@ function mark_nightscout_meal(meal) {
     let uuid = meal.uuid;
     let carbs = meal.carbs;
     let protein = meal.protein;
-    nightscout_post_request("treatments", {
-        notes: `[${uuid}]:${carbs}/${protein}`,
+    return nightscout_post_request("treatments", {
+        notes: `${carbs}/${protein}`,
         carbs: carbs,
         protein: protein,
         uuid: uuid,
