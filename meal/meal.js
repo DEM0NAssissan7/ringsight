@@ -1,5 +1,6 @@
 const A = -1;
 const B = 20;
+const MEAL_JSON_VERSION = 1;
 class Meal{
     carbs = 0;
     protein = 0;
@@ -33,6 +34,7 @@ class Meal{
             foods.push(f.get_stringify_object());
         }
         return JSON.stringify({
+            version: MEAL_JSON_VERSION,
             foods: foods,
             carbs: this.carbs_offset,
             protein: this.protein_offset,
