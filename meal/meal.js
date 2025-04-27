@@ -1,6 +1,9 @@
 const A = -1;
 const B = 20;
 const MEAL_JSON_VERSION = 1;
+function get_reading_interval() {
+    return ns.get("minutes_per_reading") / 60
+}
 class Meal{
     carbs = 0;
     protein = 0;
@@ -103,7 +106,7 @@ class Meal{
     }
     update() {
         this.calc_self_nutrition();
-        this.series.populate(this.initial_sugar, A - 2, B, ns.get("minutes_per_reading") / 60);
+        this.series.populate(this.initial_sugar, A - 2, B, get_reading_interval());
     }
     get_n(timestamp) {
         return get_hour_difference(this.timestamp, timestamp);
