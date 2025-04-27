@@ -51,7 +51,7 @@ class Meal{
 
         this.carbs_offset = obj.carbs;
         this.protein_offset = obj.protein;
-        this.uuid = obj.uuid;
+        this.uuid = obj.uuid || gen_uuid();
         for(let insulin of obj.insulins) {
             let obj = this.insulin(insulin.units, new Date(insulin.timestamp));
             obj.marked = insulin.marked;
