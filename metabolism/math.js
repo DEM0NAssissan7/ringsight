@@ -43,8 +43,14 @@ class MathSeries extends GraphSeries {
         super();
     }
     functions = []
-    add_function(c) {
-        this.functions.push(c);
+    add_function(f) {
+        this.functions.push(f);
+    }
+    transfer_functions(math_series) {
+        const self = this;
+        math_series.functions.forEach(f => {
+            self.add_function(f);
+        });
     }
     integral(current_glucose, a, b) {
         let r = current_glucose;
