@@ -172,30 +172,3 @@ function prompt_save_meal() {
     meal_storage.get("meals").push(meal.stringify());
     meal_storage.save_all();
 }
-function ignore_meal(uuid) {
-    meal_storage.get("ignored").push(uuid);
-    meal_storage.save_all();
-}
-
-// Nightscout
-let loaded_meals = [];
-function mark_nightscout_insulin(meal, amount) {
-    return nightscout_post_request("treatments", {
-        uuid: meal.uuid,
-        insulin: amount,
-        eventType: "Meal Bolus"
-    })
-}
-function mark_nightscout_meal(meal) {
-    meal.calc_self_nutrition();
-    let uuid = meal.uuid;
-    let carbs = meal.carbs;
-    let protein = meal.protein;
-    return nightscout_post_request("treatments", {
-        notes: `${carbs}/${protein}`,
-        carbs: carbs,
-        protein: protein,
-        uuid: uuid,
-        eventType: "Meal"
-    })
-}
