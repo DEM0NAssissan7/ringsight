@@ -69,3 +69,47 @@ function get_nightscout_units() {
         }
     })
 }
+
+
+// General glucose series that can be used anywhere. This is a wrapper to the series, but it's integrated with nightscout so it can be automatically populated
+ns.add_value("graph_timestamp", new Date());
+ns.add_handlers("graph_timestamp", a=>a, a=>new Date(a));
+ns.add_value("cgm_delay", 10); // How delayed the CGM is (in minutes)
+class GlucoseSeries extends GraphSeries {
+    complete = false
+    constructor(timestamp, a, b) { // 'a' and 'b' are in hours
+        super()
+        this.timestamp = timestamp;
+        this.populate(a, b);
+    }
+    async populate(a, b) { // We populate the graph with whatever points we can from 'a' hours after timestamp and 'b' hours after timestamp
+        let timestampA = this.get_timestamp_from_offset(a);
+        let timestampB = this.get_timestamp_from_offset(b);
+
+        let readings = await nightscout_get_readings(timestampA, timestampB);
+        this.complete = readings[0].timestamp.getTime() >= timestampB.getTime();
+
+        for (let r of readings) {
+            this.add_glucose_reading(r)
+        }
+    }
+    add_glucose_reading(reading) {
+        let x = this.get_relative_minutes(reading.timestamp) / 60;
+        let y = reading.sugar;
+        this.point(x, y);
+    }
+    get_relative_minutes(timestamp) {
+        return get_unix_epoch_minutes(timestamp) - get_unix_epoch_minutes(this.timestamp) - ns.get("cgm_delay"); // adjust for CGM delay to create more accurate simulations
+    }
+    get_timestamp_from_offset(a) { // offset is in hours
+        let unix_timestamp = this.timestamp.getTime();
+        let millis_from_offset = a * dimension_conversion(Units.Time.HOURS, Units.Time.MILLIS);
+        return new Date(unix_timestamp + millis_from_offset);
+    }
+}
+let glucose_series;
+// let glucose_graph = new GlucoseGraph();
+
+function init_sugar_graph(timestamp) {
+    glucose_series = new GlucoseSeries(ns.get("graph_timestamp"), -1, 8);
+}
