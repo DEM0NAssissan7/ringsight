@@ -204,15 +204,15 @@ class GraphSeries {
 
         // compute smoothed y’s
         const smoothedYs = [];
-        smoothedYs[0] = this.points[0].y;
+        smoothedYs[0] = this.points[0].rawY;
         for (let i = 1; i < this.points.length; i++) {
-            smoothedYs[i] = smooth_factor * this.points[i].y 
+            smoothedYs[i] = smooth_factor * this.points[i].rawY
                           + (1 - smooth_factor) * smoothedYs[i - 1];
         }
 
         // update point objects
         for (let i = 0; i < this.points.length; i++) {
-            this.points[i].disp_coords(this.points[i].x, smoothedYs[i]);
+            this.points[i].disp_coords(this.points[i].rawX, smoothedYs[i]);
         }
     }
     raw() {
