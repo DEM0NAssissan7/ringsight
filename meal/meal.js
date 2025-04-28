@@ -1,5 +1,6 @@
 const A = -1;
 const B = 20;
+const A_OFFSET = -2;
 const MEAL_JSON_VERSION = 1;
 function get_reading_interval() {
     return ns.get("minutes_per_reading") / 60
@@ -18,6 +19,8 @@ class Meal{
     series = null;
     cgm_series = null;
     marked = false;
+    a = A + A_OFFSET;
+    b = B;
     constructor(timestamp) {
         this.set_timestamp(timestamp);
         this.series = new MathSeries();
@@ -27,9 +30,15 @@ class Meal{
         this.series.add_function(t => carbs_metabolism(t, this.carbs));
         this.series.add_function(t => protein_metabolism(t, this.protein));
 
-        this.cgm_series = new GlucoseSeries(this.timestamp, A, B);
+        this.cgm_series = new GlucoseSeries(this.timestamp, this.a - A_OFFSET, this.b);
         this.cgm_series.color = "black";
         this.cgm_series.create_update_interval();
+    }
+    set_bounds(a, b) {
+        this.a = a;
+        this.b = b;
+        this.cgm_series.a = a;
+        this.cgm_series.b = b;
     }
     stringify() {
         let foods = [];
@@ -106,7 +115,7 @@ class Meal{
     }
     update() {
         this.calc_self_nutrition();
-        this.series.populate(this.initial_sugar, A - 2, B, get_reading_interval());
+        this.series.populate(this.initial_sugar, this.a, this.b, get_reading_interval());
     }
     get_n(timestamp) {
         return get_hour_difference(this.timestamp, timestamp);
@@ -145,6 +154,18 @@ class Meal{
         let a = this.get_n(this.get_sim_start());
         let b = this.cgm_series.points[0].rawX;
         return series_difference(this.series, this.cgm_series, a, b, get_reading_interval());
+    }
+    absorb(meal) { // Allow the meal series to absorb another meal so they can be plotted together
+        let n_offset = this.get_n(meal.timestamp);
+        for(let f of meal.series.functions) {
+            this.series.add_function(t => f(t - n_offset));
+        }
+        if(n_offset > 0) {
+            this.set_bounds(this.a, this.b + n_offset)
+        }
+        if(n_offset < 0) {
+            this.set_bounds(this.a + n_offset, this.b);
+        }
     }
 }
 
