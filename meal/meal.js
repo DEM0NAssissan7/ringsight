@@ -14,6 +14,7 @@ class Meal{
     initial_sugar = 0;
     foods = [];
     insulins = [];
+    glucoses = [];
     uuid = gen_uuid();
     name = "";
     series = null;
@@ -109,7 +110,8 @@ class Meal{
         return timestamp;
     }
     get_initial_glucose() {
-        let timestamp = new Date(this.get_sim_start().getTime() + ns.get("cgm_delay") * dimension_conversion(Units.Time.MINUTES, Units.Time.MILLIS));
+        let delay = ns.get("cgm_delay") * dimension_conversion(Units.Time.MINUTES, Units.Time.MILLIS);
+        let timestamp = new Date(this.get_sim_start().getTime() + delay * 0);
         nightscout_get_sugar(timestamp).then(a => (this.initial_sugar = a.sugar)).then(() => this.update());
     }
     add_to_graph(graph) {
@@ -132,6 +134,16 @@ class Meal{
         };
         this.insulins.push(obj);
         this.get_initial_glucose();
+        return obj;
+    }
+    glucose(caps, timestamp) {
+        this.series.add_function(t => glucose_metabolism(t, caps, this.get_n(timestamp)))
+        let obj = {
+            timestamp: timestamp,
+            caps: caps,
+            marked: false
+        };
+        this.glucoses.push(obj);
         return obj;
     }
     mark_insulin(units) {
