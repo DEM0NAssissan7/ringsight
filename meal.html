@@ -34,7 +34,7 @@
 
     <script>
         const graph = new Graph();
-        let series, sim_series, backup;
+        let backup;
         let now_line, perfect_line;
         const until = 24;
         const interval = ns.get("minutes_per_reading") / 60;
@@ -46,10 +46,18 @@
             initialize_localstorage();
             backup = export_storage();
 
-            graph.attach(document.body, 200, 200);
-            graph.set_dimensions(700, 700)
-            graph.set_bounds(-1, until, 50, 180);
-            graph.scale = 1;
+            // Meal
+            meal = new Meal(new Date("11:25 4-29-2025"));
+            meal.carbs_offset = 10;
+            meal.protein_offset = 72;
+            meal.GI = 15;
+            meal.add_to_graph(graph);
+            meal.insulin(7, new Date("12:02 4-29-2025"));
+            meal.glucose(1, new Date("14:16 4-29-2025"));
+            meal.cgm_series.smooth_factor = 0.3;
+
+
+
 
             perfect_line = new GraphSeries();
             perfect_line.color = "green";
@@ -64,33 +72,13 @@
             now_line.point(0, 0);
             graph.add_series(now_line);
 
-
-            let n_insulin = 19 / 60;
-            const effectiveness = 0.96;
-            let insulin = 6.5 * effectiveness;
-            let carbs = 6.5;
-            let protein = 63;
-
-            let insulin_line = new GraphSeries();
-            insulin_line.color = "maroon";
-            insulin_line.type = "vertical lines"
-            insulin_line.point(0, 0);
-            graph.add_series(insulin_line);
-
-
-            // Meal
-            meal = new Meal(new Date("18:09 4-28-2025"));
-            meal.carbs_offset = 3;
-            meal.protein_offset = 102;
-            meal.GI = 1;
-            meal.add_to_graph(graph);
-            meal.insulin(6.5, new Date("20:17 4-28-2025"));
-            meal.cgm_series.smooth_factor = 0.3;
+            graph.attach(document.body, 200, 200);
+            graph.set_dimensions(700, 700)
+            graph.set_bounds(-1, until, 50, 180);
+            graph.scale = 1;
 
             populate_all_series();
             document.addEventListener("mousemove", populate_all_series)
-
-            second_meal();
             set_controls();
         });
         function set_controls() {
@@ -120,53 +108,6 @@
 
             // Basal rate surplus
             create_profile_slider("basal_surplus");
-        }
-        let meal2;
-        function second_meal() {
-            const carbs = 10;
-            const protein = 72;
-            const insulin = 6.5;
-            const initial_glucose = 88;
-            const time1 = new Date("12:14 4-28-2025");
-            const insulin_time = new Date("12:41 4-28-2025");
-            const until = 24;
-
-            const graph = new Graph();
-            graph.attach(document.body, 200, 200);
-            graph.set_dimensions(700, 700)
-            graph.scale = 1;
-
-            graph.set_bounds(-1, until, 50, 130)
-            // graph.add_series(sim_series);
-
-
-            graph.add_series(perfect_line);
-            graph.add_series(now_line);
-
-
-            const meal_chip = new Meal(time1);
-            meal_chip.carbs_offset = carbs;
-            meal_chip.protein_offset = protein;
-            meal_chip.insulin(insulin, insulin_time);
-            meal_chip.update();
-            meal_chip.add_to_graph(graph);
-            meal_chip.cgm_series.smooth_factor = 0.2;
-            meal_chip.GI = 30;
-            meal_chip.absorb(meal)
-            
-            $(document).on("mousemove", () => {
-                meal_chip.update();
-            })
-
-            const time2 = new Date("18:48 4-27-2025");
-            meal2 = new Meal(time2);
-            meal2.carbs_offset = 6.6;
-            meal2.protein_offset = 72;
-            const i2 = new Date("19:10 4-27-2025");
-            now_line.point(meal_chip.get_n(i2), 0);
-            console.log(i2)
-            meal2.insulin(6.9, i2);
-            // meal.absorb(meal2);
         }
         function reset_profile_changes() {
             // let a = confirm("Are you sure you want to reset your profile changes?");
