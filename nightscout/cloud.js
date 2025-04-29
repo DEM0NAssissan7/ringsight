@@ -2,6 +2,7 @@ let ns = new StorageNode("nightscout");
 ns.add_value("url", "https://example.com");
 ns.add_value("api_secret", "");
 ns.add_value("profile", "");
+ns.add_value("initialized", false);
 
 function ns_api_path(path) {
     return `${ns.get("url")}/api/v1/${path}`
@@ -39,4 +40,12 @@ function nightscout_post_request(path, content) {
 }
 function get_nightscout_profile() {
     return nightscout_get_request("profile").then(a => a[ns.get("profile_id")]);
+}
+function get_nightscout_auth() {
+    return nightscout_get_request("verifyauth")
+}
+function check_nightscout_initialization() {
+    if(!ns.get("initialized")) {
+        window.location = "setup.html";
+    }
 }

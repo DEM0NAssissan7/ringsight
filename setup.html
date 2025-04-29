@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Nightscout Setup</title>
+
+    <link rel="stylesheet" href="stylesheet.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script src="storage.js"></script>
+    <script src="core.js"></script>
+
+    <script src="nightscout/cloud.js"></script>
+    <script src="nightscout/setup.js"></script>
+
+    <script>
+        
+        $(document).ready(() => {
+            initialize_localstorage();
+        });
+    </script>
+</head>
+
+<body>
+
+    <h1>Nightscout Setup</h1>
+
+    <div class="controls" id="sliders">
+    </div>
+
+    URL: <input id="url" type="text" placeholder="https://example.com">
+    <br>
+    <br>
+    API Secret: <input id="apisecret" type="text" placeholder="my_password">
+    <br>
+    <br>
+    <i id="status"></i>
+    <br>
+    <button onclick="enter_nightscout_info()" id="continue">Continue</button>
+
+
+    <br>
+    <br>
+    <br>
+    <button onclick="skip_nightscout_setup()">Skip Nightscout Setup</button>
+
+</body>
+
+</html>
