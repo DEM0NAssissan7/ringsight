@@ -13,7 +13,9 @@ profile.add_value("pcarbs", 0.8);
 // Protein parameters
 profile.add_value("eprotein", 1.8);
 profile.add_value("nprotein", 0.0);
-profile.add_value("pprotein", 0.15);
+profile.add_value("protein_rise", 3.0);
+profile.add_value("protein_duration", 3.0);
+profile.add_value("protein_end", 3.0);
 
 // Glucose (capsule) parameters
 profile.add_value("eglucose", 4.75);

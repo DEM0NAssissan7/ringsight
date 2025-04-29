@@ -5,12 +5,14 @@ class Food {
     carbs = 0;
     protein = 0;
     amount = 0;
-    constructor(name, carbs_per_unit, protein_per_unit, element) {
+    GI = 15; // Glycemic index
+    constructor(name, carbs_per_unit, protein_per_unit, element, GI) {
         this.carbs_per_unit;
         this.name = name;
         this.carbs_per_unit = carbs_per_unit;
         this.protein_per_unit = protein_per_unit;
         this.element = element;
+        this.GI = GI || this.GI;
     }
     stringify() {
         return JSON.stringify(this.get_stringify_object());

@@ -21,13 +21,16 @@ class Meal{
     marked = false;
     a = A + A_OFFSET;
     b = B;
+
+    GI = 15;
+    GI_avg = 0;
     constructor(timestamp) {
         this.set_timestamp(timestamp);
         this.series = new MathSeries();
         this.series.color = "blue"
         this.series.type = "smoothline";
 
-        this.series.add_function(t => carbs_metabolism(t, this.carbs));
+        this.series.add_function(t => carbs_metabolism(t, this.carbs, this.GI_avg || this.GI));
         this.series.add_function(t => protein_metabolism(t, this.protein));
 
         this.cgm_series = new GlucoseSeries(this.timestamp, this.a - A_OFFSET, this.b);
