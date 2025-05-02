@@ -168,7 +168,7 @@ class Meal{
     get_sim_error() {
         let a = this.get_n(this.get_sim_start());
         let b = this.cgm_series.points[0].rawX;
-        return series_difference(this.series, this.cgm_series, a, b, get_reading_interval());
+        return series_max_diff(this.series, this.cgm_series, a, b, get_reading_interval());
     }
     absorb(meal) { // Allow the meal series to absorb another meal so they can be plotted together
         let n_offset = this.get_n(meal.timestamp);
