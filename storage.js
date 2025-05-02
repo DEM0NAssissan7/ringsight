@@ -76,12 +76,14 @@ class StorageNode {
     get(id) {
         return this.get_value_from_id(id).value;
     }
-    set(id, value) {
+    set(id, value, nowrite = false) {
         let v = this.get_value_from_id(id);
         v.value = value;
-        for(let f of v.callbacks)
-            f(value);
-        this.write(id);
+        if(!nowrite) {
+            for(let f of v.callbacks)
+                f(value);
+            this.write(id);
+        }
         return value;
     }
 
