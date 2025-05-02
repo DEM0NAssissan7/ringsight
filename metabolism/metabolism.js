@@ -18,7 +18,7 @@ function carbs_metabolism(t, carbs, glycemic_index) {
         profile.get("ecarbs") * carbs,
         profile.get("ncarbs"),
         profile.get("pcarbs") / p_factor,
-        Z
+        G
     )
 }
 function protein_metabolism(t, protein) {
