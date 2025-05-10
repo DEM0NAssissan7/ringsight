@@ -17,7 +17,7 @@ function carbs_metabolism(t, carbs, glycemic_index) {
     return meta_function(t,
         profile.get("ecarbs") * carbs,
         profile.get("ncarbs"),
-        profile.get("pcarbs") * p_factor,
+        profile.get("pcarbs") / p_factor,
         G
     )
 }
