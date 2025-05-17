@@ -1,5 +1,6 @@
 const INSULIN_EVENT_TYPE = "Meal Bolus";
 const MEAL_EVENT_TYPE = "Meal";
+const RINGSIGHT_EVENT_TYPE = "Ringsight Event";
 
 function mark_nightscout_insulin(meal, units) {
     return nightscout_post_request("treatments", {
@@ -19,7 +20,14 @@ function mark_nightscout_meal(meal) {
         protein: protein,
         uuid: uuid,
         eventType: MEAL_EVENT_TYPE
-    })
+    });
+}
+function mark_ringsight_event(meal) {
+    return nightscout_post_request("treatments", {
+        uuid: uuid,
+        eventType: RINGSIGHT_EVENT_TYPE,
+        meal_string: meal.stringify()
+    });
 }
 
 let loaded_meals = [];
@@ -47,17 +55,21 @@ function nightscout_load_previous_meals() {
                     meal = new Meal(new Date());
                     meals[uuid] = meal;
                     uuids.push(uuid);
-                }   
+                }
+
+                if(t.eventType === RINGSIGHT_EVENT_TYPE) {
+                    meal.parse(t.meal_string);
+                }
     
                 // Determine whether it's insulin or a meal
-                if(t.insulin && t.eventType === INSULIN_EVENT_TYPE) {
-                    meal.insulin(t.insulin, t.timestamp);
-                }
-                if((t.carbs || t.protein) && t.eventType === MEAL_EVENT_TYPE) {
-                    meal.carbs_offset = t.carbs;
-                    meal.protein_offset = t.protein;
-                    meal.set_timestamp(t.timestamp);
-                }
+                // if(t.insulin && t.eventType === INSULIN_EVENT_TYPE) {
+                //     meal.insulin(t.insulin, t.timestamp);
+                // }
+                // if((t.carbs || t.protein) && t.eventType === MEAL_EVENT_TYPE) {
+                //     meal.carbs_offset = t.carbs;
+                //     meal.protein_offset = t.protein;
+                //     meal.set_timestamp(t.timestamp);
+                // }
             }
         }
         for(let uuid of uuids) {
