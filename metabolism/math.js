@@ -1,7 +1,7 @@
 function G(t, p) { // exponential: has an area under of 1 and peaks at 'p'
     p = Number(p) || 0;
     if (p <= 0) {
-        console.warn(`K() got p=${p}; returning 0`);
+        console.warn(`G() got p=${p}; returning 0`);
         return 0;
     }
     if (t <= 0) return 0;
@@ -19,7 +19,7 @@ function C(t, z) { // Constant function: has an area under it of 1 and will exte
 function K(t, p) {
     p = Number(p) || 0;
     if (p <= 0) {
-        console.warn(`G() got p=${p}; returning 0`);
+        console.warn(`K() got p=${p}; returning 0`);
         return 0;
     }
     if (t <= 0) return 0;
@@ -27,6 +27,10 @@ function K(t, p) {
 
     const x = t / p;
     return (3 / 4) * x * x - (1 / 4) * x * x * x;
+}
+function L(t, p) {
+    if(t <= 0) return 0;
+    return 2 * (1 / (1 + Math.exp(-p * t)) - 0.5);
 }
 function Z(t, p) { // Exponential decay
     if(t <= 0) return 0;
@@ -36,6 +40,17 @@ function Z2(t, p, x) {
     if(t <= 0) return 0;
     if(x <= 1) throw new Error("Z2(): Cannot use an 'x' value <= 1");
     return 1 - Math.pow(x, -p * t);
+}
+function P(t, [a, d, b]) {
+    if(t <= 0) return 0;
+    if(t >= a + d + b) return 1;
+
+    let y = 1 / (0.5 * a + d + 0.5 * b);
+
+    if(t < a) return 0.5 * (y/a) * t * t;
+    if(t < a + d) return y * t - y * a / 2;
+    let _t = t - a - d;
+    if(t < a + d + b) return (y * _t - (0.5 * (y/b) * (_t * _t))) + y * (a + d) - y * a / 2;
 }
 
 class MathSeries extends GraphSeries {

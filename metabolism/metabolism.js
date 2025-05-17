@@ -12,20 +12,21 @@ function insulin_metabolism(t, insulin, n_insulin) {
         Z
     )
 }
-function carbs_metabolism(t, carbs) {
+function carbs_metabolism(t, carbs, glycemic_index) {
+    let p_factor = (glycemic_index / 15) || 1;
     return meta_function(t,
         profile.get("ecarbs") * carbs,
         profile.get("ncarbs"),
-        profile.get("pcarbs"),
+        profile.get("pcarbs") / p_factor,
         G
     )
 }
 function protein_metabolism(t, protein) {
     return meta_function(t,
-        protein * profile.get("eprotein"),
+        profile.get("eprotein") * protein,
         profile.get("nprotein"),
-        profile.get("pprotein"),
-        G
+        [profile.get("protein_rise"), profile.get("protein_duration") * protein, profile.get("protein_end")],
+        P
     )
     // return protein_sim({
     //     protein: protein,

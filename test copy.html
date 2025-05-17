@@ -21,7 +21,6 @@
     <script src="metabolism/profile.js"></script>
     <script src="metabolism/math.js"></script>
     <script src="metabolism/metabolism.js"></script>
-    <script src="metabolism/autoprofiler.js"></script>
 
     <script src="meal/meal.js"></script>
 </head>
@@ -34,14 +33,14 @@
     </div>
 
     <script>
-        const graph = new Graph();
+        let graph = new Graph();
         let series, sim_series, backup;
         let now_line, perfect_line;
         const until = 24;
         const interval = ns.get("minutes_per_reading") / 60;
 
         function populate_all_series() {
-            meal.update();
+            sim_series.populate(130, -2, until, interval);
         }
         $(document).ready(() => {
             initialize_localstorage();
@@ -51,6 +50,11 @@
             graph.set_dimensions(700, 700)
             graph.set_bounds(-1, until, 50, 180);
             graph.scale = 1;
+
+            series = new GlucoseSeries(new Date("Apr 26 2025 13:35:00"), -1, until); // 1:35 PM
+            // series.type = "smoothline"
+            series.smooth_factor = 0.25;
+            graph.add_series(series);
 
             perfect_line = new GraphSeries();
             perfect_line.color = "green";
@@ -75,19 +79,29 @@
             let insulin_line = new GraphSeries();
             insulin_line.color = "maroon";
             insulin_line.type = "vertical lines"
-            insulin_line.point(0, 0);
+            insulin_line.point(19 / 60, 0);
             graph.add_series(insulin_line);
 
 
             // Meal
-            meal = new Meal(new Date("18:09 4-28-2025"));
-            meal.carbs_offset = 3;
-            meal.protein_offset = 102;
-            meal.GI = 1;
-            meal.add_to_graph(graph);
-            meal.insulin(6.5, new Date("20:17 4-28-2025"));
-            meal.cgm_series.smooth_factor = 0.3;
+            sim_series = new MathSeries();
+            sim_series.color = "blue";
+            sim_series.type = "smoothline"
+            graph.add_series(sim_series);
 
+            sim_series.add_function(t => insulin_metabolism(t, insulin, n_insulin));
+            sim_series.add_function(t => carbs_metabolism(t, carbs));
+            sim_series.add_function(t => protein_metabolism(t, protein));
+            sim_series.add_function(t => basal(t))
+
+            const second_dose = (20 / 60) + 4;
+            sim_series.add_function(t => insulin_metabolism(t, 3 * effectiveness, second_dose))
+
+            const g1 = 9 - (9 / 60);
+            sim_series.add_function(t => glucose_metabolism(t, 1, g1))
+            now_line.point(g1, 0);
+
+            insulin_line.point(second_dose, 0);
             populate_all_series();
             document.addEventListener("mousemove", populate_all_series)
 
@@ -124,12 +138,13 @@
         }
         let meal2;
         function second_meal() {
-            const carbs = 10;
-            const protein = 72;
-            const insulin = 6.5;
+            const carbs = 9;
+            const protein = 93.2;
+            const insulin = 7.5;
+            const n_insulin = (48/60);
             const initial_glucose = 88;
-            const time1 = new Date("12:14 4-28-2025");
-            const insulin_time = new Date("12:41 4-28-2025");
+            const time1 = new Date("12:31 4-27-2025");
+            const insulin_time = new Date("13:19 4-27-2025");
             const until = 24;
 
             const graph = new Graph();
@@ -138,6 +153,13 @@
             graph.scale = 1;
 
             graph.set_bounds(-1, until, 50, 130)
+
+            const sim_series = new MathSeries();
+            sim_series.type = "smoothline";
+            sim_series.color = "red";
+            sim_series.add_function(t => insulin_metabolism(t, insulin, n_insulin));
+            sim_series.add_function(t => carbs_metabolism(t, carbs));
+            sim_series.add_function(t => protein_metabolism(t, protein));
             // graph.add_series(sim_series);
 
 
@@ -145,18 +167,18 @@
             graph.add_series(now_line);
 
 
-            const meal_chip = new Meal(time1);
-            meal_chip.carbs_offset = carbs;
-            meal_chip.protein_offset = protein;
-            meal_chip.insulin(insulin, insulin_time);
-            meal_chip.update();
-            meal_chip.add_to_graph(graph);
-            meal_chip.cgm_series.smooth_factor = 0.2;
-            meal_chip.GI = 30;
-            meal_chip.absorb(meal)
+            meal = new Meal(time1);
+            meal.carbs_offset = carbs;
+            meal.protein_offset = protein;
+            meal.insulin(insulin, insulin_time);
+            meal.GI = 50;
+            meal.update();
+            meal.add_to_graph(graph);
+            meal.cgm_series.smooth_factor = 0.2;
             
             $(document).on("mousemove", () => {
-                meal_chip.update();
+                sim_series.populate(initial_glucose, -2, until, interval)
+                meal.update();
             })
 
             const time2 = new Date("18:48 4-27-2025");
@@ -164,15 +186,14 @@
             meal2.carbs_offset = 6.6;
             meal2.protein_offset = 72;
             const i2 = new Date("19:10 4-27-2025");
-            now_line.point(meal_chip.get_n(i2), 0);
+            now_line.point(meal.get_n(i2), 0);
             console.log(i2)
             meal2.insulin(6.9, i2);
-            // meal.absorb(meal2);
+            meal.absorb(meal2);
         }
         function reset_profile_changes() {
             // let a = confirm("Are you sure you want to reset your profile changes?");
-            let a = true;
-            if (a) import_storage(backup);
+            import_storage(backup);
         }
     </script>
     <button onclick="reset_profile_changes()">Undo All Changes</button>

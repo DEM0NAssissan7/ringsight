@@ -357,3 +357,13 @@ function series_difference(series1, series2, a, b, interval) {
     }
     return sum / count;
 }
+function series_max_diff(series1, series2, a, b, interval) {
+    let max = 0;
+    for (let x = a; x < b; x += interval) {
+        let p1 = series1.at(x);
+        let p2 = series2.at(x);
+        if (p1 === null || p2 === null) break;
+        max = Math.max(max, Math.abs(p1 - p2));
+    }
+    return max;
+}

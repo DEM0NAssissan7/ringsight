@@ -14,6 +14,7 @@ class Meal{
     initial_sugar = 0;
     foods = [];
     insulins = [];
+    glucoses = [];
     uuid = gen_uuid();
     name = "";
     series = null;
@@ -21,13 +22,16 @@ class Meal{
     marked = false;
     a = A + A_OFFSET;
     b = B;
+
+    GI = 15;
+    GI_avg = 0;
     constructor(timestamp) {
         this.set_timestamp(timestamp);
         this.series = new MathSeries();
         this.series.color = "blue"
         this.series.type = "smoothline";
 
-        this.series.add_function(t => carbs_metabolism(t, this.carbs));
+        this.series.add_function(t => carbs_metabolism(t, this.carbs, this.GI_avg || this.GI));
         this.series.add_function(t => protein_metabolism(t, this.protein));
 
         this.cgm_series = new GlucoseSeries(this.timestamp, this.a - A_OFFSET, this.b);
@@ -106,7 +110,8 @@ class Meal{
         return timestamp;
     }
     get_initial_glucose() {
-        let timestamp = new Date(this.get_sim_start().getTime() + ns.get("cgm_delay") * dimension_conversion(Units.Time.MINUTES, Units.Time.MILLIS));
+        let delay = ns.get("cgm_delay") * dimension_conversion(Units.Time.MINUTES, Units.Time.MILLIS);
+        let timestamp = new Date(this.get_sim_start().getTime() + delay * 0);
         nightscout_get_sugar(timestamp).then(a => (this.initial_sugar = a.sugar)).then(() => this.update());
     }
     add_to_graph(graph) {
@@ -131,6 +136,16 @@ class Meal{
         this.get_initial_glucose();
         return obj;
     }
+    glucose(caps, timestamp) {
+        this.series.add_function(t => glucose_metabolism(t, caps, this.get_n(timestamp)))
+        let obj = {
+            timestamp: timestamp,
+            caps: caps,
+            marked: false
+        };
+        this.glucoses.push(obj);
+        return obj;
+    }
     mark_insulin(units) {
         let timestamp = new Date();
         let obj = this.insulin(units, timestamp);
@@ -153,7 +168,7 @@ class Meal{
     get_sim_error() {
         let a = this.get_n(this.get_sim_start());
         let b = this.cgm_series.points[0].rawX;
-        return series_difference(this.series, this.cgm_series, a, b, get_reading_interval());
+        return series_max_diff(this.series, this.cgm_series, a, b, get_reading_interval());
     }
     absorb(meal) { // Allow the meal series to absorb another meal so they can be plotted together
         let n_offset = this.get_n(meal.timestamp);
