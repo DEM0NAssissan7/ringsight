@@ -1,0 +1,66 @@
+<html>
+<link rel="stylesheet" href="stylesheet.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script src="storage.js"></script>
+<script src="core.js"></script>
+
+<script src="nightscout/cloud.js"></script>
+
+<script src="wizard/wizard.js"></script>
+
+<script src="main.js"></script>
+
+<head>
+    <title>Ringsight - Wizard Intro</title>
+</head>
+
+<body>
+    <div class="box">
+        <h1>Meal Wizard</h1>
+        <p>This tool helps you plan meals, simulate glucose, and calculate insulin doses.</p>
+      
+        <div id="mealSummary" style="margin: 20px 0; font-size: 14px; color: #555;">
+          <!-- Populated via JS -->
+        </div>
+      
+        <button class="primary" onclick="startNewMeal()">Start New Meal</button>
+        <button class="secondary" onclick="continueMeal()">Resume Existing Meal</button>
+      </div>
+      
+      <script src="core.js"></script>
+      <script>
+      let meal_storage = new StorageNode("saved_meals");
+      meal_storage.add_value("meal", null);
+      
+      function displayMealSummary() {
+        try {
+          let meal = meal_storage.get("meal");
+          if (!meal || !meal.timestamp) {
+            document.getElementById("mealSummary").innerText = "No active meal found.";
+            return;
+          }
+          document.getElementById("mealSummary").innerText =
+            `Last meal started: ${new Date(meal.timestamp).toLocaleString()}\n` +
+            `Carbs: ${meal.carbs || 0}g, Protein: ${meal.protein || 0}g`;
+        } catch {
+          document.getElementById("mealSummary").innerText = "Could not read active meal.";
+        }
+      }
+      
+      function startNewMeal() {
+        let meal = new Meal(new Date());
+        meal_storage.set("meal", meal);
+        window.location.href = "wizard_meal.html";
+      }
+      
+      function continueMeal() {
+        window.location.href = "wizard_meal.html";
+      }
+      
+      window.onload = displayMealSummary;
+      </script>      
+
+</body>
+
+</html>
