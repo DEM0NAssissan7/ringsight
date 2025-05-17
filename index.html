@@ -1,10 +1,37 @@
 <html>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<link rel="stylesheet" href="stylesheet.css">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-    <script src="storage.js"></script>
-    <script src="core.js"></script>
+<script src="storage.js"></script>
+<script src="core.js"></script>
 
-    <script src="nightscout/cloud.js"></script>
+<script src="nightscout/cloud.js"></script>
 
-    <script src="main.js"></script>
+<script src="wizard/wizard.js"></script>
+
+<script src="main.js"></script>
+
+<head>
+    <title>Ringsight - Main Menu</title>
+</head>
+
+<body>
+
+    <h1>Ringsight</h1>
+
+    <div class="menu">
+        <div class="tile" onclick="go(get_wizard_html_name(wizard_state.get('page')))">🧙 Wizard</div>
+        <br>
+        <div class="tile" onclick="go('profiler.html')">🧪 Profiler</div>
+        <div class="tile" onclick="go('settings.html')">⚙️ Settings</div>
+    </div>
+
+    <script>
+        function go(path) {
+            window.location.href = path;
+        }
+    </script>
+
+</body>
+
 </html>
