@@ -23,9 +23,9 @@ function carbs_metabolism(t, carbs, glycemic_index) {
 }
 function protein_metabolism(t, protein) {
     return meta_function(t,
-        protein * profile.get("eprotein"),
+        profile.get("eprotein") * protein,
         profile.get("nprotein"),
-        [profile.get("protein_rise"), profile.get("protein_duration"), profile.get("protein_end")],
+        [profile.get("protein_rise"), profile.get("protein_duration") * protein, profile.get("protein_end")],
         P
     )
     // return protein_sim({

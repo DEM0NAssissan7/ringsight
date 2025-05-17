@@ -1,27 +1,27 @@
 const profile = new StorageNode("profile");
 
 // Insulin parameters
-profile.add_value("einsulin", 28.7);
+profile.add_value("einsulin", 18);
 profile.add_value("ninsulin", 0.5);
-profile.add_value("pinsulin", 0.6);
+profile.add_value("pinsulin", 0.43);
 
 // Carbohydrate parameters
-profile.add_value("ecarbs", 4.2);
+profile.add_value("ecarbs", 4.1);
 profile.add_value("ncarbs", 0.0);
-profile.add_value("pcarbs", 0.8);
+profile.add_value("pcarbs", 1.61);
 
 // Protein parameters
-profile.add_value("eprotein", 1.8);
+profile.add_value("eprotein", 1.19);
 profile.add_value("nprotein", 0.0);
-profile.add_value("protein_rise", 3.0);
-profile.add_value("protein_duration", 3.0);
-profile.add_value("protein_end", 3.0);
+profile.add_value("protein_rise", 3.6);
+profile.add_value("protein_duration", 0.0351);
+profile.add_value("protein_end", 1.83);
 
 // Glucose (capsule) parameters
-profile.add_value("eglucose", 4.75);
-profile.add_value("pglucose", 6);
+profile.add_value("eglucose", 4.275);
+profile.add_value("pglucose", 6.45);
 profile.add_value("mls_per_cap", 15);
-profile.add_value("glucose_density", 15 / 60);   // g/ml
+profile.add_value("glucose_density", 1/3);   // g/ml
 
 // Basal rate surplus
 profile.add_value("basal_surplus", 0.0);
