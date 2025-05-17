@@ -1,3 +1,5 @@
+/* This file is experimental */
+
 function optimize_value(meal, id, initial_value = 0, precision = 10) {
     let inc = 4;
     let val = initial_value;
